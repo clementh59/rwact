@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Worst vs Best</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Manrope', sans-serif;
+    background: #0a0a12;
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Background gradient blobs */
+  body::before {
+    content: '';
+    position: absolute;
+    width: 800px;
+    height: 800px;
+    left: -200px;
+    top: -100px;
+    background: radial-gradient(circle, rgba(180, 100, 60, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  body::after {
+    content: '';
+    position: absolute;
+    width: 800px;
+    height: 800px;
+    right: -200px;
+    bottom: -100px;
+    background: radial-gradient(circle, rgba(60, 140, 160, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .container {
+    max-width: 1100px;
+    width: 100%;
+    padding: 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .title {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 42px;
+    text-align: center;
+    letter-spacing: -2px;
+    margin-bottom: 60px;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .cards {
+    display: flex;
+    gap: 48px;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .card {
+    flex: 1;
+    height: 480px;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    border: 1.5px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    transition: transform 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+  }
+
+  /* Loss card - muted warm amber/coral */
+  .card--loss {
+    background: linear-gradient(
+      135deg,
+      rgba(180, 90, 50, 0.12) 0%,
+      rgba(200, 110, 60, 0.08) 100%
+    );
+  }
+
+  .card--loss .card__image-area {
+    background: linear-gradient(
+      160deg,
+      #c47a3a 0%,
+      #a85d3a 40%,
+      #7a3e2e 100%
+    );
+  }
+
+  .card--loss .card__overlay {
+    background: linear-gradient(
+      230deg,
+      rgba(160, 80, 40, 0) 20%,
+      rgba(140, 65, 30, 0.95) 75%
+    );
+  }
+
+  /* Win card - muted cool teal/slate blue */
+  .card--win {
+    background: linear-gradient(
+      135deg,
+      rgba(60, 130, 150, 0.12) 0%,
+      rgba(70, 140, 160, 0.08) 100%
+    );
+  }
+
+  .card--win .card__image-area {
+    background: linear-gradient(
+      160deg,
+      #3a8a8f 0%,
+      #2d7a7a 40%,
+      #1e5a5e 100%
+    );
+  }
+
+  .card--win .card__overlay {
+    background: linear-gradient(
+      240deg,
+      rgba(50, 120, 130, 0) 20%,
+      rgba(35, 100, 110, 0.95) 75%
+    );
+  }
+
+  .card__image-area {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 120px;
+    opacity: 0.6;
+  }
+
+  .card__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .card__content {
+    position: relative;
+    z-index: 2;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .card__label {
+    font-weight: 500;
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  .card__info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .card__question {
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 1.25;
+    color: white;
+  }
+
+  .card__bet {
+    font-weight: 500;
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  .card__bet strong {
+    color: white;
+    font-weight: 700;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 16px;
+    border-radius: 900px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    width: fit-content;
+    border: 1.5px solid;
+  }
+
+  /* Loss badge - warm muted */
+  .badge--loss {
+    background: rgba(200, 120, 70, 0.25);
+    border-color: rgba(220, 150, 100, 0.4);
+    color: #e8a070;
+  }
+
+  /* Win badge - cool muted */
+  .badge--win {
+    background: rgba(70, 170, 160, 0.2);
+    border-color: rgba(100, 200, 190, 0.35);
+    color: #6ad4c8;
+  }
+
+  /* VS pill */
+  .vs-pill {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    border-radius: 900px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .vs-pill span {
+    font-weight: 700;
+    font-size: 36px;
+    color: white;
+  }
+
+  /* Pagination dots */
+  .dots {
+    position: absolute;
+    right: -36px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    transition: all 0.3s ease;
+  }
+
+  .dot--active {
+    background: rgba(255, 255, 255, 0.7);
+    width: 12px;
+    height: 12px;
+  }
+
+  /* Footer */
+  .footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 48px;
+    backdrop-filter: blur(8px);
+    background: rgba(10, 10, 18, 0.6);
+  }
+
+  .footer__copy {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  .footer__buttons {
+    display: flex;
+    gap: 8px;
+  }
+
+  .footer__btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 100px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: white;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .footer__btn:hover {
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  .footer__btn svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+  }
+
+  /* Image placeholders with emoji */
+  .card__emoji {
+    font-size: 140px;
+    position: absolute;
+    z-index: 0;
+  }
+
+  .card--loss .card__emoji {
+    top: -10px;
+    right: -10px;
+    transform: rotate(10deg);
+    opacity: 0.5;
+  }
+
+  .card--win .card__emoji {
+    top: -10px;
+    right: 10px;
+    opacity: 0.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1 class="title">Worst vs Best</h1>
+
+  <div class="cards">
+    <!-- Loss Card -->
+    <div class="card card--loss">
+      <div class="card__image-area">
+        <span class="card__emoji">🇨🇳</span>
+      </div>
+      <div class="card__overlay"></div>
+      <div class="card__content">
+        <span class="card__label">Biggest Loss</span>
+        <div class="card__info">
+          <h2 class="card__question">Will Trump visit China by...?</h2>
+          <p class="card__bet">You bet No at <strong>$0.625</strong></p>
+        </div>
+        <div class="badge badge--loss">-$311</div>
+      </div>
+    </div>
+
+    <!-- VS Pill -->
+    <div class="vs-pill">
+      <span>VS</span>
+    </div>
+
+    <!-- Win Card -->
+    <div class="card card--win">
+      <div class="card__image-area">
+        <span class="card__emoji">🏆</span>
+      </div>
+      <div class="card__overlay"></div>
+      <div class="card__content">
+        <span class="card__label">Biggest Win</span>
+        <div class="card__info">
+          <h2 class="card__question">2026 FIFA World Cup Winner</h2>
+          <p class="card__bet">You bet Spain at <strong>$0.625</strong></p>
+        </div>
+        <div class="badge badge--win">+$4.1K</div>
+      </div>
+    </div>
+
+    <!-- Pagination dots -->
+    <div class="dots">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot dot--active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <span class="footer__copy">&copy; 2025, Otomato</span>
+  <div class="footer__buttons">
+    <button class="footer__btn">
+      <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 2.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zM5.5 10.5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v.5h-5v-.5z"/></svg>
+      Feedback
+    </button>
+    <button class="footer__btn">
+      <svg viewBox="0 0 16 16"><path d="M4 1h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2zm1 3v2h6V4H5zm0 4v1h6V8H5zm0 3v1h4v-1H5z"/></svg>
+      Docs
+    </button>
+  </div>
+</div>
+
+</body>
+</html>
