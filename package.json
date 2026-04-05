@@ -1,0 +1,28 @@
+{
+  "name": "cannes-xstocks",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@zerodev/ecdsa-validator": "^5.4.9",
+    "@zerodev/permissions": "^5.6.3",
+    "@zerodev/sdk": "^5.5.8",
+    "better-sqlite3": "^12.8.0",
+    "dotenv": "^17.3.1",
+    "ethers": "^6.16.0",
+    "express": "^5.2.1",
+    "otomato-sdk": "^2.0.525",
+    "uuid": "^13.0.0",
+    "viem": "^2.47.6"
+  },
+  "devDependencies": {
+    "eslint": "^10.1.0"
+  }
+}
